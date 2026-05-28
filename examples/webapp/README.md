@@ -1,15 +1,14 @@
-# MarkItDown Web App Example
+# MarkItDown Backend API Example
 
-This example provides a minimal website that uploads a document and converts it to Markdown using the `MarkItDown` Python API.
+This example provides a minimal backend API that accepts a document upload and converts it to Markdown using the `MarkItDown` Python API.
 
-## Features
+## Features (backend only)
 
-- File upload form + convert button
-- Backend `/api/convert` endpoint
+- `POST /api/convert` endpoint for multipart uploads
+- `GET /` health endpoint
 - Validation for file extension, MIME type, and max size (20 MB)
 - Stream-only conversion via `MarkItDown.convert_stream(...)`
 - User-friendly conversion error messages
-- Client-side `.md` download button
 
 ## Run locally
 
@@ -22,7 +21,21 @@ pip install -e 'packages/markitdown[all]'
 python examples/webapp/app.py
 ```
 
-Open: `http://127.0.0.1:8000`
+## API usage
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/convert \
+  -F "document=@/absolute/path/to/file.pdf"
+```
+
+Response:
+
+```json
+{
+  "markdown": "...",
+  "output_filename": "file.md"
+}
+```
 
 ## Security notes
 

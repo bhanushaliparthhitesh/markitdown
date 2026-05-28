@@ -292,11 +292,11 @@ print(result.text_content)
 
 ### Web App Example
 
-A minimal upload-and-convert website example is available at:
+A minimal backend API example is available at:
 
 `examples/webapp/app.py`
 
-It provides a file upload form and a backend API endpoint that converts uploaded documents to Markdown using `MarkItDown.convert_stream(...)`.
+It provides a backend endpoint that converts uploaded documents to Markdown using `MarkItDown.convert_stream(...)`.
 
 See `examples/webapp/README.md` for setup and run instructions.
 

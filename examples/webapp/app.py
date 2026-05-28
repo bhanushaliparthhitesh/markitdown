@@ -4,7 +4,7 @@ import io
 import os
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template_string, request
+from flask import Flask, jsonify, request
 
 from markitdown import (
     FailedConversionAttempt,
@@ -44,89 +44,6 @@ ALLOWED_MIME_PREFIXES = (
     "image/",
 )
 
-HTML_PAGE = """
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MarkItDown Web Converter</title>
-  <style>
-    body { font-family: sans-serif; margin: 2rem; max-width: 960px; }
-    .card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; }
-    textarea { width: 100%; min-height: 360px; margin-top: 1rem; }
-    .row { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-    .error { color: #b00020; margin-top: 0.8rem; }
-    .muted { color: #666; font-size: 0.95rem; }
-    button { cursor: pointer; }
-  </style>
-</head>
-<body>
-  <h1>Document → Markdown</h1>
-  <p class="muted">Upload a document and convert it to Markdown with MarkItDown.</p>
-
-  <div class="card">
-    <form id="upload-form" class="row">
-      <input type="file" id="document" name="document" required>
-      <button type="submit">Convert</button>
-      <button type="button" id="download-btn" disabled>Download .md</button>
-    </form>
-    <div id="error" class="error"></div>
-    <textarea id="markdown" placeholder="Converted markdown will appear here..." readonly></textarea>
-  </div>
-
-  <script>
-    const form = document.getElementById("upload-form");
-    const input = document.getElementById("document");
-    const output = document.getElementById("markdown");
-    const error = document.getElementById("error");
-    const downloadBtn = document.getElementById("download-btn");
-
-    let downloadName = "document.md";
-
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      error.textContent = "";
-      output.value = "";
-      downloadBtn.disabled = true;
-
-      if (!input.files || input.files.length === 0) {
-        error.textContent = "Please choose a file.";
-        return;
-      }
-
-      const payload = new FormData();
-      payload.append("document", input.files[0]);
-
-      const response = await fetch("/api/convert", { method: "POST", body: payload });
-      const data = await response.json();
-
-      if (!response.ok) {
-        error.textContent = data.error || "Failed to convert document.";
-        return;
-      }
-
-      output.value = data.markdown;
-      downloadName = data.output_filename || "document.md";
-      downloadBtn.disabled = false;
-    });
-
-    downloadBtn.addEventListener("click", () => {
-      const blob = new Blob([output.value], { type: "text/markdown;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = downloadName;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-    });
-  </script>
-</body>
-</html>
-"""
-
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_SIZE_BYTES
 markitdown = MarkItDown()
@@ -142,8 +59,13 @@ def _is_allowed_upload(filename: str, mimetype: str | None) -> bool:
 
 
 @app.get("/")
-def index():
-    return render_template_string(HTML_PAGE)
+def health():
+    return jsonify(
+        {
+            "status": "ok",
+            "message": "Use POST /api/convert with form-data key 'document'.",
+        }
+    )
 
 
 @app.post("/api/convert")
