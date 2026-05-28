@@ -258,6 +258,16 @@ result = md.convert("test.xlsx")
 print(result.text_content)
 ```
 
+To convert a PDF directly to Markdown:
+
+```python
+from markitdown import MarkItDown
+
+md = MarkItDown()
+result = md.convert("document.pdf")
+print(result.markdown)
+```
+
 Document Intelligence conversion in Python:
 
 ```python
